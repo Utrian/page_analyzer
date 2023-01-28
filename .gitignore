@@ -1,0 +1,17 @@
+.env
+
+.pytest_cache
+
+.venv
+
+.vscode
+
+dist
+
+__pycache__
+
+.coverage
+
+cc-test-reporter
+
+coverage.xml
