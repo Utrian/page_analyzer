@@ -8,7 +8,7 @@
     </head>
     <body class="d-flex flex-column h-100">
         <header class="flex-shrink-0">
-            <nav class="navbar navbar-expand-md navbar-dark bg-dark px-3">
+            <nav class="navbar navbar-expand-md navbar-dark bg-dark px-1">
                 <div class="container-fluid">
                     <a class="navbar-brand" href="/">Анализатор страниц</a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Переключатель навигации">
@@ -16,12 +16,19 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNav">
                         <div class="navbar-nav">
-                            <a class="nav-link" href="/urls">Сайты</a>
+                            <a class="nav-link" href="{{ url_for('show_all_urls') }}">Сайты</a>
                         </div>
                     </div>
                 </div>
             </nav>
         </header>
+        {% if message %}
+        {% for category, message in message %}
+        <div class="alert {{ category }} px-3" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
         <main class="flex-shrink-0">
             {% block content %}{% endblock %}
         </main>
