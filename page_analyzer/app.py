@@ -71,10 +71,9 @@ class Database:
         checks_data = self.curs.fetchall()
         return checks_data
 
-    def create_check_entry(
-            self, url_id: int, h1=None,
-            title=None, description=None
-            ):
+    def create_check_entry(self, url_id: int):
+        h1, title, description = None, None, None
+
         self.curs.execute(
             'SELECT name FROM urls WHERE id=%s',
             (url_id,)
@@ -94,9 +93,8 @@ class Database:
             title = soup.select('title')[0].text.strip()
 
         if soup.find('meta', {"name": "description"}):
-            description = soup.find(
-                'meta', {"name": "description"}
-            ).attrs['content']
+            description = soup.find('meta', {"name": "description"})
+            description = description.attrs['content']
 
         self.curs.execute(
             'INSERT INTO url_checks '

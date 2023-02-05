@@ -1,15 +1,3 @@
-init:
-	poetry init
-	poetry config virtualenvs.in-project true
-	poetry shell
-	poetry add pytest pytest-cov coverage flake8
-	curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-0.10.4-linux-amd64 > ./test-coverage-tool #бинарник для работы test_coverage на linux
-	chmod +x ./test-coverage-tool
-	./test-coverage-tool before-build
-	poetry run pytest --cov=main_dir --cov-report xml
-	./test-coverage-tool after-build -r #id
-	printf ".pytest_cache \n\n.venv \n\n.vscode \n\ndist \n\n__pychache__ \n\n.coverage \n" > .gitignore
-
 install:
 	poetry install
 
