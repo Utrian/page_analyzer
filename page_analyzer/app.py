@@ -189,6 +189,6 @@ def check_url(id):
         flash('Не удалось подключиться к базе данных', 'alert-warning')
         return redirect(url_for('homepage'))
 
-    except Exception:
+    except requests.exceptions.RequestException:
         flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('show_url', id=id))
