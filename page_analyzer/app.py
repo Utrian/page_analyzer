@@ -134,7 +134,7 @@ def new_url():
 
     if not (len(url_name) <= 255 and validators.url(url_name)):
         flash('Некорректный URL', 'alert-danger')
-        return redirect(url_for('homepage'))
+        return redirect(url_for('homepage'), 422)
 
     try:
         db = Database()
@@ -184,7 +184,7 @@ def check_url(id):
         return redirect(url_for('show_url', id=id))
 
     except requests.exceptions.RequestException:
-        flash('Произошла ошибка при проверке', 'alert-warning')
+        flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('show_url', id=id))
 
     except psycopg2.DatabaseError:
