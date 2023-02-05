@@ -134,7 +134,7 @@ def new_url():
 
     if not validators.url(norm_url) or len(norm_url) > 255:
         flash('Некорректный URL', 'alert-danger')
-        return redirect(url_for('homepage'))
+        return redirect(url_for('homepage'), Response=422)
 
     try:
         db = Database()
@@ -187,6 +187,6 @@ def check_url(id):
         flash('Не удалось подключиться к базе данных', 'alert-warning')
         return redirect(url_for('homepage'))
 
-    except:
+    except Exception:
         flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('show_url', id=id))
