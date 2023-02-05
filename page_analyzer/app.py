@@ -84,7 +84,7 @@ class Database:
         status_code = resp.status_code
 
         html = resp.text
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, features="html.parser")
 
         if soup.select('h1'):
             h1 = soup.select('h1')[0].text.strip()
@@ -181,6 +181,10 @@ def check_url(id):
         db.close()
 
         flash('Страница успешно проверена', 'alert-success')
+        return redirect(url_for('show_url', id=id))
+
+    except requests.exceptions.RequestException:
+        flash('Произошла ошибка при проверке', 'alert-warning')
         return redirect(url_for('show_url', id=id))
 
     except psycopg2.DatabaseError:
