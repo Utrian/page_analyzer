@@ -94,7 +94,7 @@ def show_all_urls():
             'urls.html', urls=urls_data
         )
 
-    except psycopg2.Error:
+    except psycopg2.DatabaseError:
         flash('Не удалось подключиться к базе данных', 'alert-warning')
         return redirect(url_for('homepage'))
 
@@ -121,7 +121,7 @@ def new_url():
         db.close()
         return redirect(url_for('show_url', id=url_data.id))
 
-    except psycopg2.Error:
+    except psycopg2.DatabaseError:
         flash('Не удалось подключиться к базе данных', 'alert-warning')
         return redirect(url_for('homepage'))
 
@@ -140,7 +140,7 @@ def show_url(id):
             url_checks=checks_data, message=message
         )
 
-    except psycopg2.Error:
+    except psycopg2.DatabaseError:
         flash('Не удалось подключиться к базе данных', 'alert-warning')
         return redirect(url_for('homepage'))
 
@@ -155,6 +155,6 @@ def check_url(id):
         flash('Страница успешно проверена', 'alert-success')
         return redirect(url_for('show_url', id=id))
 
-    except psycopg2.Error:
+    except psycopg2.DatabaseError:
         flash('Не удалось подключиться к базе данных', 'alert-warning')
         return redirect(url_for('homepage'))
