@@ -183,10 +183,10 @@ def check_url(id):
         flash('Страница успешно проверена', 'alert-success')
         return redirect(url_for('show_url', id=id))
 
-    except requests.exceptions.RequestException:
-        flash('Произошла ошибка при проверке', 'alert-danger')
-        return redirect(url_for('show_url', id=id))
-
     except psycopg2.DatabaseError:
         flash('Не удалось подключиться к базе данных', 'alert-warning')
         return redirect(url_for('homepage'))
+
+    except:
+        flash('Произошла ошибка при проверке', 'alert-danger')
+        return redirect(url_for('show_url', id=id))
