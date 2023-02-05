@@ -1,7 +1,7 @@
 import os
 import psycopg2
 import requests
-import validators.url
+import validators
 from typing import Union
 from datetime import date
 from bs4 import BeautifulSoup
@@ -130,20 +130,20 @@ def show_all_urls():
 @app.post('/urls')
 def new_url():
     url = urlparse(request.form.get('url'))
-    url_name = url.scheme + '://' + url.netloc
+    norm_url = url.scheme + '://' + url.netloc
 
-    if not (len(url_name) <= 255 and validators.url(url_name)):
+    if not validators.url(norm_url) or len(norm_url) > 255:
         flash('Некорректный URL', 'alert-danger')
         return redirect(url_for('homepage'), 422)
 
     try:
         db = Database()
-        url_data = db.find_url(url_name)
+        url_data = db.find_url(norm_url)
 
         if url_data:
             flash('Страница уже существует', 'alert-info')
         else:
-            url_data = db.create_url_entry(url_name)
+            url_data = db.create_url_entry(norm_url)
             flash('Страница успешно добавлена', 'alert-success')
 
         db.close()
