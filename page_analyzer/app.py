@@ -31,8 +31,16 @@ class Database:
         self.curs.close()
         self.conn.close()
 
-    def get_all_urls(self) -> NamedTupleCursor:
-        self.curs.execute('SELECT * FROM urls ORDER BY id DESC')
+    def get_urls_data(self) -> NamedTupleCursor:
+        self.curs.execute(
+            'SELECT '
+            'urls.id, urls.name, url_checks.status_code, '
+            'MAX(url_checks.created_at) as last_check '
+            'FROM urls LEFT JOIN url_checks '
+            'ON urls.id = url_checks.url_id '
+            'GROUP BY urls.id, url_checks.status_code '
+            'ORDER BY urls.id DESC;'
+        )
         urls_data = self.curs.fetchall()
         return urls_data
 
@@ -45,7 +53,7 @@ class Database:
         url_data = self.curs.fetchone()
         return url_data
 
-    def create_url_entry(self, url_name: str) -> NamedTupleCursor:
+    def create_url_entry(self, url_name: str):
         self.curs.execute(
             'INSERT INTO urls (name, created_at) VALUES (%s, %s)',
             (url_name, date.today())
@@ -61,7 +69,7 @@ class Database:
         checks_data = self.curs.fetchall()
         return checks_data
 
-    def create_check_entry(self, url_id: int) -> NamedTupleCursor:
+    def create_check_entry(self, url_id: int):
         self.curs.execute(
             'INSERT INTO url_checks (url_id, created_at) VALUES (%s, %s)',
             (url_id, date.today())
@@ -79,9 +87,12 @@ def homepage():
 def show_all_urls():
     try:
         db = Database()
-        urls_data = db.get_all_urls()
+        urls_data = db.get_urls_data()
         db.close()
-        return render_template('urls.html', urls=urls_data)
+
+        return render_template(
+            'urls.html', urls=urls_data
+        )
 
     except psycopg2.Error:
         flash('Не удалось подключиться к базе данных', 'alert-warning')
@@ -92,7 +103,6 @@ def show_all_urls():
 def new_url():
     url = urlparse(request.form.get('url'))
     url_name = url.scheme + '://' + url.netloc
-    print('//////////////////////', url_name)
 
     if not (len(url_name) <= 255 and validators.url(url_name)):
         flash('Некорректный URL', 'alert-danger')
@@ -122,8 +132,9 @@ def show_url(id):
         db = Database()
         url_data = db.find_url(id)
         checks_data = db.find_checks(id)
-        message = get_flashed_messages(with_categories=True)
         db.close()
+
+        message = get_flashed_messages(with_categories=True)
         return render_template(
             'show_url.html', url=url_data,
             url_checks=checks_data, message=message
@@ -140,6 +151,7 @@ def check_url(id):
         db = Database()
         db.create_check_entry(id)
         db.close()
+
         flash('Страница успешно проверена', 'alert-success')
         return redirect(url_for('show_url', id=id))
 
