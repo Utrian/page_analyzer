@@ -150,8 +150,9 @@ def new_url():
     if not validators.url(norm_url) or len(norm_url) > 255:
         flash('Некорректный URL', 'alert-danger')
         return render_template(
-            'index.html', message=get_flashed_messages(with_categories=True)
-            ), 422
+            'index.html',
+            message=get_flashed_messages(with_categories=True)
+        ), 422
 
     try:
         db = Urls()
