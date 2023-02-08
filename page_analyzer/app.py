@@ -33,6 +33,8 @@ class Database:
         self.curs.close()
         self.conn.close()
 
+
+class Urls(Database):
     def get_urls_data(self) -> NamedTupleCursor:
         self.curs.execute(
             'SELECT DISTINCT ON (urls.id)'
@@ -43,6 +45,7 @@ class Database:
             'GROUP BY urls.id, url_checks.status_code '
             'ORDER BY urls.id DESC;'
         )
+
         urls_data = self.curs.fetchall()
         return urls_data
 
@@ -52,6 +55,7 @@ class Database:
         else:
             id = url
             self.curs.execute('SELECT * FROM urls WHERE id=%s', (id,))
+
         url_data = self.curs.fetchone()
         return url_data
 
@@ -60,31 +64,23 @@ class Database:
             'INSERT INTO urls (name, created_at) VALUES (%s, %s)',
             (url_name, date.today())
         )
+
         self.save()
         return self.find_url(url_name)
 
+
+class Checks(Database):
     def find_checks(self, url_id: int) -> NamedTupleCursor:
         self.curs.execute(
             'SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC',
             (url_id,)
         )
+
         checks_data = self.curs.fetchall()
         return checks_data
 
-    def create_check_entry(self, url_id: int):
+    def get_resp_data(self, soup: BeautifulSoup):
         h1, title, description = None, None, None
-
-        self.curs.execute(
-            'SELECT name FROM urls WHERE id=%s',
-            (url_id,)
-        )
-        url_name = self.curs.fetchone().name
-
-        resp = requests.get(url_name)
-        status_code = resp.status_code
-
-        html = resp.text
-        soup = BeautifulSoup(html, features="html.parser")
 
         if soup.select('h1'):
             h1 = soup.select('h1')[0].text.strip()
@@ -95,6 +91,25 @@ class Database:
         if soup.find('meta', {"name": "description"}):
             description = soup.find('meta', {"name": "description"})
             description = description.attrs['content']
+
+        return h1, title, description
+
+    def create_check_entry(self, url_id: int):
+        self.curs.execute(
+            'SELECT name FROM urls WHERE id=%s',
+            (url_id,)
+        )
+        url_name = self.curs.fetchone().name
+
+        resp = requests.get(url_name)
+        status_code = resp.status_code
+
+        if status_code != 200:
+            raise requests.exceptions.RequestException
+
+        html = resp.text
+        soup = BeautifulSoup(html, features="html.parser")
+        h1, title, description = self.get_resp_data(soup)
 
         self.curs.execute(
             'INSERT INTO url_checks '
@@ -114,7 +129,7 @@ def homepage():
 @app.get('/urls')
 def show_all_urls():
     try:
-        db = Database()
+        db = Urls()
         urls_data = db.get_urls_data()
         db.close()
 
@@ -139,7 +154,7 @@ def new_url():
             ), 422
 
     try:
-        db = Database()
+        db = Urls()
         url_data = db.find_url(norm_url)
 
         if url_data:
@@ -159,9 +174,9 @@ def new_url():
 @app.get('/urls/<int:id>')
 def show_url(id):
     try:
-        db = Database()
+        db = Urls()
         url_data = db.find_url(id)
-        checks_data = db.find_checks(id)
+        checks_data = Checks.find_checks(db, id)
         db.close()
 
         message = get_flashed_messages(with_categories=True)
@@ -178,7 +193,7 @@ def show_url(id):
 @app.post('/urls/<int:id>/check')
 def check_url(id):
     try:
-        db = Database()
+        db = Checks()
         db.create_check_entry(id)
         db.close()
 
