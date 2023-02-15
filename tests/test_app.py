@@ -2,6 +2,9 @@
                                         ##########       Alpha version       ############
                                         #################################################
 
+def test_app():
+    assert 1 == 1
+
 # import pytest
 # import psycopg2
 # import pg_temp
