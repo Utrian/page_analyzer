@@ -51,7 +51,7 @@ def new_url():
 
     try:
         db = Urls()
-        url_data = db.find_url(norm_url)
+        url_data = db.find_url_by_name(norm_url)
 
         if url_data:
             flash('Страница уже существует', 'alert-info')
@@ -71,7 +71,7 @@ def new_url():
 def show_url(id):
     try:
         db = Urls()
-        url_data = db.find_url(id)
+        url_data = db.find_url_by_id(id)
         checks_data = Checks.find_checks(db, id)
         db.close()
 
