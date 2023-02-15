@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 from flask import (
     Flask, render_template, request,
-    redirect, url_for, flash, get_flashed_messages
+    redirect, url_for, flash
 )
 
 from .database import Urls, Checks
@@ -20,8 +20,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 @app.route('/')
 def homepage():
-    message = get_flashed_messages(with_categories=True)
-    return render_template('index.html', message=message)
+    return render_template('index.html')
 
 
 @app.get('/urls')
@@ -48,10 +47,7 @@ def new_url():
     if not validators.url(norm_url) or len(norm_url) > 255:
         flash('Некорректный URL', 'alert-danger')
 
-        return render_template(
-            'index.html',
-            message=get_flashed_messages(with_categories=True)
-        ), 422
+        return render_template('index.html'), 422
 
     try:
         db = Urls()
@@ -79,10 +75,9 @@ def show_url(id):
         checks_data = Checks.find_checks(db, id)
         db.close()
 
-        message = get_flashed_messages(with_categories=True)
         return render_template(
             'show_url.html', url=url_data,
-            url_checks=checks_data, message=message
+            url_checks=checks_data
         )
 
     except psycopg2.DatabaseError:

@@ -56,6 +56,31 @@ class Urls(Database):
         return self.find_url(url_name)
 
 
+def get_resp_data(url_name):
+    resp = requests.get(url_name)
+    status_code = resp.status_code
+
+    if status_code != 200:
+        raise requests.exceptions.RequestException
+
+    html = resp.text
+    soup = BeautifulSoup(html, features="html.parser")
+
+    h1, title, description = None, None, None
+
+    if soup.select('h1'):
+        h1 = soup.select('h1')[0].text.strip()
+
+    if soup.select('title'):
+        title = soup.select('title')[0].text.strip()
+
+    if soup.find('meta', {"name": "description"}):
+        description = soup.find('meta', {"name": "description"})
+        description = description.attrs['content']
+
+    return status_code, h1, title, description
+
+
 class Checks(Database):
     def find_checks(self, url_id: int) -> NamedTupleCursor:
         self.curs.execute(
@@ -66,21 +91,6 @@ class Checks(Database):
         checks_data = self.curs.fetchall()
         return checks_data
 
-    def get_resp_data(self, soup: BeautifulSoup):
-        h1, title, description = None, None, None
-
-        if soup.select('h1'):
-            h1 = soup.select('h1')[0].text.strip()
-
-        if soup.select('title'):
-            title = soup.select('title')[0].text.strip()
-
-        if soup.find('meta', {"name": "description"}):
-            description = soup.find('meta', {"name": "description"})
-            description = description.attrs['content']
-
-        return h1, title, description
-
     def create_check_entry(self, url_id: int):
         self.curs.execute(
             'SELECT name FROM urls WHERE id=%s',
@@ -88,15 +98,7 @@ class Checks(Database):
         )
         url_name = self.curs.fetchone().name
 
-        resp = requests.get(url_name)
-        status_code = resp.status_code
-
-        if status_code != 200:
-            raise requests.exceptions.RequestException
-
-        html = resp.text
-        soup = BeautifulSoup(html, features="html.parser")
-        h1, title, description = self.get_resp_data(soup)
+        status_code, h1, title, description = get_resp_data(url_name)
 
         self.curs.execute(
             'INSERT INTO url_checks '
