@@ -50,8 +50,8 @@ class Urls(Database):
                 'INSERT INTO urls (name, created_at) VALUES (%s, %s)',
                 (url_name, date.today())
             )
-            self.save()
 
+        self.save()
         return self.find_url_by_name(url_name)
 
 
@@ -112,4 +112,5 @@ class Checks(Database):
                 'VALUES (%s, %s, %s, %s, %s, %s)',
                 (url_id, status_code, h1, title, description, date.today())
             )
-            self.save()
+
+        self.save()
