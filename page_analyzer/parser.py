@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_resp_data(url_name):
+def get_check_data(url_id, url_name):
     resp = requests.get(url_name)
     status_code = resp.status_code
 
@@ -24,4 +24,9 @@ def get_resp_data(url_name):
         description = soup.find('meta', {"name": "description"})
         description = description.attrs['content']
 
-    return status_code, h1, title, description
+    return {
+        'id': url_id,
+        'status_code': status_code,
+        'h1': h1, 'title': title,
+        'description': description
+    }

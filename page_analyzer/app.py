@@ -9,7 +9,8 @@ from flask import (
     redirect, url_for, flash
 )
 
-from .database import Urls, Checks
+from .parser import get_check_data
+from .database import Urls, Checks, Database
 
 
 app = Flask(__name__)
@@ -26,9 +27,8 @@ def homepage():
 @app.get('/urls')
 def show_all_urls():
     try:
-        db = Urls()
-        urls_data = db.get_urls_data()
-        db.close()
+        with Urls() as db:
+            urls_data = db.get_urls_data()
 
         return render_template(
             'urls.html', urls=urls_data
@@ -50,16 +50,15 @@ def new_url():
         return render_template('index.html'), 422
 
     try:
-        db = Urls()
-        url_data = db.find_url_by_name(norm_url)
+        with Urls() as db:
+            url_data = db.find_url_by_name(norm_url)
 
-        if url_data:
-            flash('Страница уже существует', 'alert-info')
-        else:
-            url_data = db.create_url_entry(norm_url)
-            flash('Страница успешно добавлена', 'alert-success')
+            if url_data:
+                flash('Страница уже существует', 'alert-info')
+            else:
+                url_data = db.create_url_entry(norm_url)
+                flash('Страница успешно добавлена', 'alert-success')
 
-        db.close()
         return redirect(url_for('show_url', id=url_data.id))
 
     except psycopg2.DatabaseError:
@@ -70,10 +69,9 @@ def new_url():
 @app.get('/urls/<int:id>')
 def show_url(id):
     try:
-        db = Urls()
-        url_data = db.find_url_by_id(id)
-        checks_data = Checks.find_checks(db, id)
-        db.close()
+        with Urls() as db:
+            url_data = db.find_url_by_id(id)
+            checks_data = Checks.find_checks(db, id)
 
         return render_template(
             'show_url.html', url=url_data,
@@ -88,9 +86,10 @@ def show_url(id):
 @app.post('/urls/<int:id>/check')
 def check_url(id):
     try:
-        db = Checks()
-        db.create_check_entry(id)
-        db.close()
+        with Database() as db:
+            url_name = Urls.find_url_by_id(db, id).name
+            check_data = get_check_data(id, url_name)
+            Checks.create_check_entry(db, check_data)
 
         flash('Страница успешно проверена', 'alert-success')
         return redirect(url_for('show_url', id=id))

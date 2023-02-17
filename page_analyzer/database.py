@@ -3,19 +3,23 @@ import psycopg2
 from datetime import date
 from psycopg2.extras import NamedTupleCursor
 
-from .parser import get_resp_data
-
 
 class Database:
     def __init__(self):
         self.DATABASE_URL = os.getenv('DATABASE_URL')
         self.conn = psycopg2.connect(self.DATABASE_URL)
 
+    def __enter__(self):
+        return self
+
     def save(self):
         self.conn.commit()
 
     def close(self):
         self.conn.close()
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
 
 class Urls(Database):
@@ -34,14 +38,14 @@ class Urls(Database):
 
         return urls_data
 
-    def find_url_by_id(self, id: int) -> NamedTupleCursor:
+    def find_url_by_id(self, url_id: int) -> NamedTupleCursor:
         with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
-            curs.execute('SELECT * FROM urls WHERE id=(%s)', (id,))
+            curs.execute('SELECT * FROM urls WHERE id=(%s)', (url_id,))
             return curs.fetchone()
 
-    def find_url_by_name(self, url: str) -> NamedTupleCursor:
+    def find_url_by_name(self, url_name: str) -> NamedTupleCursor:
         with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
-            curs.execute('SELECT * FROM urls WHERE name=(%s)', (url,))
+            curs.execute('SELECT * FROM urls WHERE name=(%s)', (url_name,))
             return curs.fetchone()
 
     def create_url_entry(self, url_name: str):
@@ -67,25 +71,21 @@ class Checks(Database):
 
         return checks_data
 
-    def create_check_entry(self, url_id: int):
-        with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
-            curs.execute(
-                'SELECT name FROM urls WHERE id=%s',
-                (url_id,)
-            )
-            url_name = curs.fetchone().name
-
-        status_code, h1, title, description = get_resp_data(url_name)
-
-        with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
-            curs.execute(
-                'INSERT INTO url_checks '
-                '('
-                'url_id, status_code, h1, '
-                'title, description, created_at'
-                ') '
-                'VALUES (%s, %s, %s, %s, %s, %s)',
-                (url_id, status_code, h1, title, description, date.today())
-            )
+    def create_check_entry(self, check_data: dict):
+        with self.conn:
+            with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
+                curs.execute(
+                    'INSERT INTO url_checks '
+                    '('
+                    'url_id, status_code, h1, '
+                    'title, description, created_at'
+                    ') '
+                    'VALUES (%s, %s, %s, %s, %s, %s)',
+                    (
+                        check_data['id'], check_data['status_code'],
+                        check_data['h1'], check_data['title'],
+                        check_data['description'], date.today()
+                    )
+                )
 
         self.save()
