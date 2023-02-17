@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_check_data(url_id, url_name):
+def get_check_data(url_id: int, url_name: str) -> dict:
     resp = requests.get(url_name)
     status_code = resp.status_code
 

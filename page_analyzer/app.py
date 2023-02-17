@@ -46,7 +46,6 @@ def new_url():
 
     if not validators.url(norm_url) or len(norm_url) > 255:
         flash('Некорректный URL', 'alert-danger')
-
         return render_template('index.html'), 422
 
     try:
@@ -56,10 +55,10 @@ def new_url():
             if url_data:
                 flash('Страница уже существует', 'alert-info')
             else:
-                url_data = db.create_url_entry(norm_url)
+                url_id = db.create_url_entry(norm_url)
                 flash('Страница успешно добавлена', 'alert-success')
 
-        return redirect(url_for('show_url', id=url_data.id))
+        return redirect(url_for('show_url', id=url_id))
 
     except psycopg2.DatabaseError:
         flash('Не удалось подключиться к базе данных', 'alert-warning')

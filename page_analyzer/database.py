@@ -18,7 +18,7 @@ class Database:
     def close(self):
         self.conn.close()
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, *exc):
         self.close()
 
 
@@ -48,7 +48,7 @@ class Urls(Database):
             curs.execute('SELECT * FROM urls WHERE name=(%s)', (url_name,))
             return curs.fetchone()
 
-    def create_url_entry(self, url_name: str):
+    def create_url_entry(self, url_name: str) -> int:
         with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             curs.execute(
                 'INSERT INTO urls (name, created_at) VALUES (%s, %s)',
@@ -56,7 +56,7 @@ class Urls(Database):
             )
 
         self.save()
-        return self.find_url_by_name(url_name)
+        return self.find_url_by_name(url_name).id
 
 
 class Checks(Database):
@@ -71,21 +71,20 @@ class Checks(Database):
 
         return checks_data
 
-    def create_check_entry(self, check_data: dict):
-        with self.conn:
-            with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
-                curs.execute(
-                    'INSERT INTO url_checks '
-                    '('
-                    'url_id, status_code, h1, '
-                    'title, description, created_at'
-                    ') '
-                    'VALUES (%s, %s, %s, %s, %s, %s)',
-                    (
-                        check_data['id'], check_data['status_code'],
-                        check_data['h1'], check_data['title'],
-                        check_data['description'], date.today()
-                    )
+    def create_check_entry(self, check_data: dict) -> None:
+        with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
+            curs.execute(
+                'INSERT INTO url_checks '
+                '('
+                'url_id, status_code, h1, '
+                'title, description, created_at'
+                ') '
+                'VALUES (%s, %s, %s, %s, %s, %s)',
+                (
+                    check_data['id'], check_data['status_code'],
+                    check_data['h1'], check_data['title'],
+                    check_data['description'], date.today()
                 )
+            )
 
         self.save()
