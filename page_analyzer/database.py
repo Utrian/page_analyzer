@@ -1,9 +1,9 @@
 import os
-import requests
 import psycopg2
 from datetime import date
-from bs4 import BeautifulSoup
 from psycopg2.extras import NamedTupleCursor
+
+from .parser import get_resp_data
 
 
 class Database:
@@ -53,31 +53,6 @@ class Urls(Database):
 
         self.save()
         return self.find_url_by_name(url_name)
-
-
-def get_resp_data(url_name):
-    resp = requests.get(url_name)
-    status_code = resp.status_code
-
-    if status_code != 200:
-        raise requests.exceptions.RequestException
-
-    html = resp.text
-    soup = BeautifulSoup(html, features="html.parser")
-
-    h1, title, description = None, None, None
-
-    if soup.select('h1'):
-        h1 = soup.select('h1')[0].text.strip()
-
-    if soup.select('title'):
-        title = soup.select('title')[0].text.strip()
-
-    if soup.find('meta', {"name": "description"}):
-        description = soup.find('meta', {"name": "description"})
-        description = description.attrs['content']
-
-    return status_code, h1, title, description
 
 
 class Checks(Database):
