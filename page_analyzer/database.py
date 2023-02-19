@@ -1,6 +1,7 @@
 import os
 import psycopg2
 from datetime import date
+from typing import NamedTuple
 from psycopg2.extras import NamedTupleCursor
 
 
@@ -23,7 +24,7 @@ class Database:
 
 
 class Urls(Database):
-    def get_urls_data(self) -> NamedTupleCursor:
+    def get_urls_data(self) -> NamedTuple:
         with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             curs.execute(
                 'SELECT DISTINCT ON (urls.id)'
@@ -38,12 +39,12 @@ class Urls(Database):
 
         return urls_data
 
-    def find_url_by_id(self, url_id: int) -> NamedTupleCursor:
+    def find_url_by_id(self, url_id: int) -> NamedTuple:
         with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             curs.execute('SELECT * FROM urls WHERE id=(%s)', (url_id,))
             return curs.fetchone()
 
-    def find_url_by_name(self, url_name: str) -> NamedTupleCursor:
+    def find_url_by_name(self, url_name: str) -> NamedTuple:
         with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             curs.execute('SELECT * FROM urls WHERE name=(%s)', (url_name,))
             return curs.fetchone()
@@ -60,7 +61,7 @@ class Urls(Database):
 
 
 class Checks(Database):
-    def find_checks(self, url_id: int) -> NamedTupleCursor:
+    def find_checks(self, url_id: int) -> NamedTuple:
         with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             curs.execute(
                 'SELECT * FROM url_checks '
