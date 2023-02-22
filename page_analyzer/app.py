@@ -53,6 +53,7 @@ def new_url():
             url_data = db.find_url_by_name(norm_url)
 
             if url_data:
+                url_id = url_data.id
                 flash('Страница уже существует', 'alert-info')
             else:
                 url_id = db.create_url_entry(norm_url)
