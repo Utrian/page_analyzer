@@ -1,6 +1,5 @@
 import os
 import psycopg2
-import requests
 import validators
 from urllib.parse import urlparse
 from dotenv import load_dotenv
@@ -98,6 +97,6 @@ def check_url(id):
         flash('Не удалось подключиться к базе данных', 'alert-warning')
         return redirect(url_for('homepage'))
 
-    except requests.exceptions.RequestException:
+    except Exception:
         flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('show_url', id=id))
