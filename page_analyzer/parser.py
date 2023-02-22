@@ -19,9 +19,8 @@ def get_check_data(url_id: int, url_name: str) -> dict:
         title = soup.find('title').get_text(strip=True)
 
     if soup.find('meta', {"name": "description"}):
-        description = soup.find(
-            'meta', {"name": "description"}
-            ).get('content')
+        description = soup.find('meta', {"name": "description"})
+        description = description.get('content')
 
     return {
         'id': url_id,
