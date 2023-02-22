@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 
 def get_check_data(url_id: int, url_name: str) -> dict:
     resp = requests.get(url_name)
+    resp.raise_for_status()
     status_code = resp.status_code
 
     html = resp.text

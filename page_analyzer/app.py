@@ -1,8 +1,9 @@
 import os
 import psycopg2
 import validators
-from urllib.parse import urlparse
 from dotenv import load_dotenv
+from urllib.parse import urlparse
+from requests.exceptions import RequestException
 from flask import (
     Flask, render_template, request,
     redirect, url_for, flash
@@ -97,6 +98,6 @@ def check_url(id):
         flash('Не удалось подключиться к базе данных', 'alert-warning')
         return redirect(url_for('homepage'))
 
-    except Exception:
+    except RequestException:
         flash('Произошла ошибка при проверке', 'alert-danger')
         return redirect(url_for('show_url', id=id))
