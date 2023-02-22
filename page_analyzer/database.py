@@ -13,14 +13,8 @@ class Database:
     def __enter__(self):
         return self
 
-    def save(self):
-        self.conn.commit()
-
-    def close(self):
-        self.conn.close()
-
     def __exit__(self, *exc):
-        self.close()
+        self.conn.close()
 
 
 class Urls(Database):
@@ -52,12 +46,14 @@ class Urls(Database):
     def create_url_entry(self, url_name: str) -> int:
         with self.conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             curs.execute(
-                'INSERT INTO urls (name, created_at) VALUES (%s, %s)',
+                'INSERT INTO urls (name, created_at) '
+                'VALUES (%s, %s) RETURNING id',
                 (url_name, date.today())
             )
+            self.conn.commit()
+            url_id = curs.fetchone().id
 
-        self.save()
-        return self.find_url_by_name(url_name).id
+            return url_id
 
 
 class Checks(Database):
@@ -82,10 +78,9 @@ class Checks(Database):
                 ') '
                 'VALUES (%s, %s, %s, %s, %s, %s)',
                 (
-                    check_data['id'], check_data['status_code'],
-                    check_data['h1'], check_data['title'],
-                    check_data['description'], date.today()
+                    check_data.get('id'), check_data.get('status_code'),
+                    check_data.get('h1'), check_data.get('title'),
+                    check_data.get('description'), date.today()
                 )
             )
-
-        self.save()
+            self.conn.commit()
