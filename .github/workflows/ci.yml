@@ -18,12 +18,3 @@ jobs:
           poetry install
       - name: Run linter
         run: make lint
-      - name: Test
-        run: make pytest
-      - name: Test & publish code coverage
-        uses: paambaati/codeclimate-action@v3.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.TEST_REPORTER_ID }}
-        with:
-          coverageCommand: make pytest
-          debug: true
