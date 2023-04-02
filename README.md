@@ -1,7 +1,3 @@
-[![GitHub Actions](https://github.com/Utrian/python-project-83/actions/workflows/ci.yml/badge.svg)](https://github.com/Utrian/python-project-83/actions/workflows/ci.yml)
-[![Maintainability](https://api.codeclimate.com/v1/badges/8b46ee19e75fbbf30f4a/maintainability)](https://codeclimate.com/github/Utrian/python-project-83/maintainability)
-
-
 # **Page Analyzer** - Does the site have SEO?
 
 ## **About**
