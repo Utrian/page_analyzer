@@ -1,7 +1,7 @@
 # **Page Analyzer** - Does the site have SEO?
 
 ## **About**
-You can check your site for SEO - [Page Analyzer](https://python-project-83-production-167b.up.railway.app/). This will add it to my site's database. You can also see the sites added by other users.
+You can check your site for SEO - [Page Analyzer](https://page-analyzer-by-utrian.up.railway.app/). This will add it to my site's database. You can also see the sites added by other users.
 
 ## **Install**
 If you want to download the application, use the following commands:
